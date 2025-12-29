@@ -57,18 +57,110 @@
             Нет фото
           {% endif %}
         </td>
-        <td>{% if car.is_featured %}⭐{% endif %}</td>
+        <td>
+          <a href="/cars/toggle_featured/{{ car.id }}" style="text-decoration:none;">
+            {% if car.is_featured %}
+              ⭐
+            {% else %}
+              ❌
+            {% endif %}
+          </a>
+        </td>
         <td>{{ car.brand.name }}</td>
         <td>{{ car.model }}</td>
         <td>{{ car.year }}</td>
         <td>{{ car.fuel }}</td>
         <td>{{ car.transmission }}</td>
         <td>{{ car.price }}</td>
-        <td><a href="/cars/delete/{{ car.id }}">❌</a></td>
+        <td><a href="/cars/delete/{{ car.id }}">🗑️</a></td>
       </tr>
       {% endfor %}
     </table>
   </div>
+
+  <footer>© 2025 Suvtekin Auto Marketplace — Developed by Muha</footer>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Автомобили — Suvtekin Admin</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="navbar">
+    <h2>Suvtekin Admin Panel</h2>
+    <a href="/brands">Бренды</a>
+    <a href="/cars">Авто</a>
+    <a href="/managers">Менеджеры</a>
+    <a href="/requests">Заявки</a>
+    <a href="/logout">Выйти</a>
+  </div>
+
+  <div class="content">
+    <h3>Добавить автомобиль</h3>
+    <form method="POST" action="/cars/add" enctype="multipart/form-data">
+      <label>Бренд:</label>
+      <select name="brand">
+        {% for b in brands %}
+          <option value="{{ b.id }}">{{ b.name }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="model" placeholder="Модель" required>
+      <input type="text" name="year" placeholder="Год выпуска" required>
+      <input type="text" name="transmission" placeholder="Коробка передач" required>
+      <input type="text" name="fuel" placeholder="Тип топлива" required>
+      <input type="text" name="price" placeholder="Цена" required>
+      <label>Фото (до 5):</label>
+      <input type="file" name="images" multiple accept="image/*">
+      <label><input type="checkbox" name="is_featured"> ⭐ Сделать избранным</label>
+      <button type="submit">Добавить</button>
+    </form>
+
+    <h3>Список автомобилей</h3>
+    <table border="1" width="100%">
+      <tr>
+        <th>Фото</th>
+        <th>⭐</th>
+        <th>Бренд</th>
+        <th>Модель</th>
+        <th>Год</th>
+        <th>Топливо</th>
+        <th>КПП</th>
+        <th>Цена</th>
+        <th>Действие</th>
+      </tr>
+      {% for car in cars %}
+      <tr>
+        <td>
+          {% if car.images %}
+            <img src="{{ car.images[0].path }}" width="100">
+          {% else %}
+            Нет фото
+          {% endif %}
+        </td>
+        <td>
+          <a href="/cars/toggle_featured/{{ car.id }}" style="text-decoration:none;">
+            {% if car.is_featured %}
+              ⭐
+            {% else %}
+              ❌
+            {% endif %}
+          </a>
+        </td>
+        <td>{{ car.brand.name }}</td>
+        <td>{{ car.model }}</td>
+        <td>{{ car.year }}</td>
+        <td>{{ car.fuel }}</td>
+        <td>{{ car.transmission }}</td>
+        <td>{{ car.price }}</td>
+        <td><a href="/cars/delete/{{ car.id }}">🗑️</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
   <footer>© 2025 Suvtekin Auto Marketplace — Developed by Muha</footer>
 </body>
 </html>
