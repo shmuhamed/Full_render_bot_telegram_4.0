@@ -31,6 +31,7 @@
       <input type="text" name="price" placeholder="Цена" required>
       <label>Фото (до 5):</label>
       <input type="file" name="images" multiple accept="image/*">
+      <label><input type="checkbox" name="is_featured"> ⭐ Сделать избранным</label>
       <button type="submit">Добавить</button>
     </form>
 
@@ -38,6 +39,7 @@
     <table border="1" width="100%">
       <tr>
         <th>Фото</th>
+        <th>⭐</th>
         <th>Бренд</th>
         <th>Модель</th>
         <th>Год</th>
@@ -49,13 +51,13 @@
       {% for car in cars %}
       <tr>
         <td>
-          {% for img in car.images[:1] %}
-            <img src="{{ img.path }}" width="100"><br>
-          {% endfor %}
-          {% if car.images|length > 1 %}
-            (+{{ car.images|length - 1 }} фото)
+          {% if car.images %}
+            <img src="{{ car.images[0].path }}" width="100">
+          {% else %}
+            Нет фото
           {% endif %}
         </td>
+        <td>{% if car.is_featured %}⭐{% endif %}</td>
         <td>{{ car.brand.name }}</td>
         <td>{{ car.model }}</td>
         <td>{{ car.year }}</td>
