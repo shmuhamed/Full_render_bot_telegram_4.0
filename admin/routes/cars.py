@@ -39,6 +39,7 @@ def add_new_car():
     price = request.form["price"]
     transmission = request.form["transmission"]
     fuel = request.form["fuel"]
+    is_featured = "is_featured" in request.form  # ✅ Новое поле
 
     upload_dir = os.path.join(current_app.root_path, "static", "uploads")
     os.makedirs(upload_dir, exist_ok=True)
@@ -55,10 +56,9 @@ def add_new_car():
             file.save(original_path)
             compress_image(original_path, compressed_path)
             os.remove(original_path)
-
             image_paths.append(f"/static/uploads/{os.path.basename(compressed_path)}")
 
-    add_car_with_images(brand_id, model, year, transmission, fuel, price, image_paths)
+    add_car_with_images(brand_id, model, year, transmission, fuel, price, image_paths, is_featured)
     return redirect("/cars")
 
 @cars_bp.route("/delete/<int:car_id>")
@@ -69,18 +69,13 @@ def delete_car_route(car_id):
     session_db = get_session()
     car = session_db.get(Car, car_id)
     if car:
-        # Удаляем все фото с диска
         for img in car.images:
             image_path = os.path.join(current_app.root_path, img.path.lstrip("/"))
             if os.path.exists(image_path):
                 try:
                     os.remove(image_path)
-                    print(f"🗑️ Удалено изображение: {image_path}")
                 except Exception as e:
-                    print(f"⚠️ Ошибка при удалении {image_path}: {e}")
-
-        # Удаляем сам автомобиль
+                    print(f"⚠️ Ошибка удаления {image_path}: {e}")
         session_db.delete(car)
         session_db.commit()
-        print(f"✅ Удалён автомобиль ID={car_id} и связанные изображения.")
     return redirect("/cars")
