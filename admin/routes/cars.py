@@ -1,7 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, session
+import os
+from flask import Blueprint, render_template, request, redirect, session, current_app
+from werkzeug.utils import secure_filename
 from database.models import get_all_cars, get_all_brands, add_car, delete_car
 
 cars_bp = Blueprint("cars", __name__, url_prefix="/cars")
+
+UPLOAD_FOLDER = "admin/static/uploads"
 
 @cars_bp.route("/")
 def show_cars():
@@ -15,13 +19,32 @@ def show_cars():
 def add_new_car():
     if not session.get("logged_in"):
         return redirect("/login")
+
     brand_id = request.form["brand"]
     model = request.form["model"]
     year = request.form["year"]
     price = request.form["price"]
     transmission = request.form["transmission"]
     fuel = request.form["fuel"]
-    add_car(brand_id, model, year, transmission, fuel, price)
+
+    image_path = None
+    file = request.files.get("image")
+    if file and file.filename:
+        filename = secure_filename(file.filename)
+        upload_dir = os.path.join(current_app.root_path, "static", "uploads")
+        os.makedirs(upload_dir, exist_ok=True)
+        file.save(os.path.join(upload_dir, filename))
+        image_path = f"/static/uploads/{filename}"
+
+    # добавляем с фото
+    from database.models import get_session, Car
+    session = get_session()
+    new_car = Car(brand_id=brand_id, model=model, year=year,
+                  transmission=transmission, fuel=fuel, price=price,
+                  image=image_path)
+    session.add(new_car)
+    session.commit()
+
     return redirect("/cars")
 
 @cars_bp.route("/delete/<int:car_id>")
