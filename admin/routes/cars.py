@@ -2,18 +2,17 @@ import os
 from flask import Blueprint, render_template, request, redirect, session, current_app
 from werkzeug.utils import secure_filename
 from PIL import Image
-from database.models import get_all_cars, get_all_brands, add_car_with_images, delete_car
+from database.models import get_all_cars, get_all_brands, add_car_with_images, get_session, Car, CarImage
 
 cars_bp = Blueprint("cars", __name__, url_prefix="/cars")
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
-MAX_WIDTH = 1280  # Максимальная ширина изображения
+MAX_WIDTH = 1280
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def compress_image(input_path, output_path):
-    """Сжимает изображение, сохраняя пропорции и качество."""
     try:
         img = Image.open(input_path)
         img.thumbnail((MAX_WIDTH, MAX_WIDTH))
@@ -55,7 +54,7 @@ def add_new_car():
 
             file.save(original_path)
             compress_image(original_path, compressed_path)
-            os.remove(original_path)  # Удаляем исходный (большой) файл
+            os.remove(original_path)
 
             image_paths.append(f"/static/uploads/{os.path.basename(compressed_path)}")
 
@@ -66,5 +65,22 @@ def add_new_car():
 def delete_car_route(car_id):
     if not session.get("logged_in"):
         return redirect("/login")
-    delete_car(car_id)
+
+    session_db = get_session()
+    car = session_db.get(Car, car_id)
+    if car:
+        # Удаляем все фото с диска
+        for img in car.images:
+            image_path = os.path.join(current_app.root_path, img.path.lstrip("/"))
+            if os.path.exists(image_path):
+                try:
+                    os.remove(image_path)
+                    print(f"🗑️ Удалено изображение: {image_path}")
+                except Exception as e:
+                    print(f"⚠️ Ошибка при удалении {image_path}: {e}")
+
+        # Удаляем сам автомобиль
+        session_db.delete(car)
+        session_db.commit()
+        print(f"✅ Удалён автомобиль ID={car_id} и связанные изображения.")
     return redirect("/cars")
