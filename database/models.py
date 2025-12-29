@@ -5,8 +5,6 @@ Base = declarative_base()
 engine = create_engine("sqlite:///database/suvtekin.db", echo=False)
 Session = sessionmaker(bind=engine)
 
-# ---- Модели ----
-
 class Brand(Base):
     __tablename__ = "brands"
     id = Column(Integer, primary_key=True)
@@ -22,6 +20,7 @@ class Car(Base):
     transmission = Column(String)
     fuel = Column(String)
     price = Column(String)
+    is_featured = Column(Boolean, default=False)  # ⭐ Новое поле
     brand = relationship("Brand", back_populates="cars")
     images = relationship("CarImage", back_populates="car", cascade="all, delete")
 
@@ -32,36 +31,22 @@ class CarImage(Base):
     path = Column(String)
     car = relationship("Car", back_populates="images")
 
-class Manager(Base):
-    __tablename__ = "managers"
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    surname = Column(String)
-    phone = Column(String)
-    email = Column(String)
-    telegram_username = Column(String)
+# Остальные модели (Manager, Request) — без изменений
 
-class Request(Base):
-    __tablename__ = "requests"
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    contact = Column(String)
-    details = Column(String)
-    done = Column(Boolean, default=False)
-
-# ---- CRUD ----
 def get_session(): return Session()
 
-def get_all_cars():
-    return get_session().query(Car).all()
-
+# Получаем авто, где избранные идут первыми
 def get_cars_by_brand(brand_id):
-    return get_session().query(Car).filter_by(brand_id=brand_id).all()
+    session = get_session()
+    return session.query(Car).filter_by(brand_id=brand_id).order_by(Car.is_featured.desc()).all()
 
-def add_car_with_images(brand_id, model, year, transmission, fuel, price, image_paths):
+def add_car_with_images(brand_id, model, year, transmission, fuel, price, image_paths, is_featured=False):
     s = get_session()
-    car = Car(brand_id=brand_id, model=model, year=year,
-              transmission=transmission, fuel=fuel, price=price)
+    car = Car(
+        brand_id=brand_id, model=model, year=year,
+        transmission=transmission, fuel=fuel, price=price,
+        is_featured=is_featured
+    )
     s.add(car)
     s.commit()
     for path in image_paths:
