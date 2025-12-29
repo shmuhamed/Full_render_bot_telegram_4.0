@@ -1,4 +1,4 @@
-pip==25.1.1
+ppip==25.1.1
 setuptools==75.1.0
 wheel==0.44.0
 
@@ -6,6 +6,4 @@ aiogram==3.4.1
 Flask==3.0.2
 python-dotenv==1.0.1
 SQLAlchemy==2.0.25
-
-# версия Pillow, у которой есть готовые колёса для Linux
 Pillow==9.4.0
