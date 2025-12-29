@@ -1,9 +1,25 @@
 import os
 from flask import Blueprint, render_template, request, redirect, session, current_app
 from werkzeug.utils import secure_filename
+from PIL import Image
 from database.models import get_all_cars, get_all_brands, add_car_with_images, delete_car
 
 cars_bp = Blueprint("cars", __name__, url_prefix="/cars")
+
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
+MAX_WIDTH = 1280  # Максимальная ширина изображения
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def compress_image(input_path, output_path):
+    """Сжимает изображение, сохраняя пропорции и качество."""
+    try:
+        img = Image.open(input_path)
+        img.thumbnail((MAX_WIDTH, MAX_WIDTH))
+        img.convert("RGB").save(output_path, "JPEG", optimize=True, quality=80)
+    except Exception as e:
+        print(f"⚠️ Ошибка сжатия изображения: {e}")
 
 @cars_bp.route("/")
 def show_cars():
@@ -30,11 +46,18 @@ def add_new_car():
 
     image_paths = []
     files = request.files.getlist("images")
-    for file in files[:5]:  # максимум 5 фото
-        if file and file.filename:
+
+    for file in files[:5]:
+        if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(upload_dir, filename))
-            image_paths.append(f"/static/uploads/{filename}")
+            original_path = os.path.join(upload_dir, filename)
+            compressed_path = os.path.join(upload_dir, f"compressed_{filename}")
+
+            file.save(original_path)
+            compress_image(original_path, compressed_path)
+            os.remove(original_path)  # Удаляем исходный (большой) файл
+
+            image_paths.append(f"/static/uploads/{os.path.basename(compressed_path)}")
 
     add_car_with_images(brand_id, model, year, transmission, fuel, price, image_paths)
     return redirect("/cars")
