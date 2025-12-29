@@ -16,14 +16,16 @@ async def show_cars(callback: types.CallbackQuery):
         await callback.message.answer(get_text(callback.from_user.id, "no_cars"))
         return
 
-    for car in cars:
-        text = (
-            f"<b>{car.brand.name} {car.model}</b>\n"
-            f"Год / Yil: {car.year}\n"
-            f"КПП / Uzatma: {car.transmission}\n"
-            f"Топливо / Yoqilg‘i: {car.fuel}\n"
-            f"Цена / Narx: {car.price}$"
-        )
+for car in cars:
+    star = "⭐ " if car.is_featured else ""
+    text = (
+        f"{star}<b>{car.brand.name} {car.model}</b>\n"
+        f"Год / Yil: {car.year}\n"
+        f"КПП / Uzatma: {car.transmission}\n"
+        f"Топливо / Yoqilg‘i: {car.fuel}\n"
+        f"Цена / Narx: {car.price}$"
+    )
+
 
         if car.images:
             album = []
