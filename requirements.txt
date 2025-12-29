@@ -3,6 +3,7 @@ setuptools==75.1.0
 wheel==0.44.0
 
 aiogram==3.4.1
+aiohttp==3.9.1
 Flask==3.0.2
 python-dotenv==1.0.1
 SQLAlchemy==2.0.25
