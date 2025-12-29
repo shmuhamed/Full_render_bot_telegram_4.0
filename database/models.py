@@ -56,3 +56,8 @@ def get_featured_cars():
     """Возвращает все избранные автомобили (⭐)"""
     session = get_session()
     return session.query(Car).filter_by(is_featured=True).all()
+    def search_cars_by_model(query):
+    """Ищет автомобили по названию модели (без учёта регистра)."""
+    session = get_session()
+    return session.query(Car).filter(Car.model.ilike(f"%{query}%")).all()
+
