@@ -52,3 +52,7 @@ def add_car_with_images(brand_id, model, year, transmission, fuel, price, image_
     for path in image_paths:
         s.add(CarImage(car_id=car.id, path=path))
     s.commit()
+def get_featured_cars():
+    """Возвращает все избранные автомобили (⭐)"""
+    session = get_session()
+    return session.query(Car).filter_by(is_featured=True).all()
