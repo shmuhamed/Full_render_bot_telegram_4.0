@@ -29,8 +29,8 @@
       <input type="text" name="transmission" placeholder="Коробка передач" required>
       <input type="text" name="fuel" placeholder="Тип топлива" required>
       <input type="text" name="price" placeholder="Цена" required>
-      <label>Фото:</label>
-      <input type="file" name="image" accept="image/*">
+      <label>Фото (до 5):</label>
+      <input type="file" name="images" multiple accept="image/*">
       <button type="submit">Добавить</button>
     </form>
 
@@ -49,10 +49,11 @@
       {% for car in cars %}
       <tr>
         <td>
-          {% if car.image %}
-            <img src="{{ car.image }}" width="100">
-          {% else %}
-            Нет фото
+          {% for img in car.images[:1] %}
+            <img src="{{ img.path }}" width="100"><br>
+          {% endfor %}
+          {% if car.images|length > 1 %}
+            (+{{ car.images|length - 1 }} фото)
           {% endif %}
         </td>
         <td>{{ car.brand.name }}</td>
