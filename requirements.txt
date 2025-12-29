@@ -5,4 +5,4 @@ aiogram==3.4.1
 Flask==3.0.2
 python-dotenv==1.0.1
 SQLAlchemy==2.0.25
-Pillow==10.2.0
+Pillow==9.5.0
