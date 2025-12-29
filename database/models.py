@@ -22,7 +22,9 @@ class Car(Base):
     transmission = Column(String)
     fuel = Column(String)
     price = Column(String)
+    image = Column(String)  # 🆕 путь к изображению
     brand = relationship("Brand", back_populates="cars")
+
 
 # 👨‍💼 Менеджеры
 class Manager(Base):
